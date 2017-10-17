@@ -1,4 +1,4 @@
-//Contar el numero de lineas del fichero a.txt que contiene la palabra casa.
+#Contar el numero de lineas del fichero a.txt que contiene la palabra casa.
 
 grep casa a.txt | wc -l
 
