@@ -39,7 +39,7 @@ int Conecta_base()
 // Devuelve -1 si no ha podido consultar
 // Devuelve -2 si el usuario no esta en la tabla
 
-int Buscar_en_Tabla(char name[20],char password[20])
+int Login(char name[20],char password[20])
 
 {
 	char consulta[100];
@@ -145,6 +145,115 @@ int Registro(char name[20],char password[20]){
 	
 }
 
+int Partidas_ganadas (char nombre[20])
+
+char nombre[20];
+// Pregunto el nombre del jugador
+printf("Dame el nombre del jugador\n");
+scanf("%s", nombre);
+
+char consulta[80];
+strcpy(consulta, "SELECT partidas.id_p,partidas.fecha FROM jugadores,partidas,relacion WHERE jugadores.nombre = '");
+strcat(consulta, nombre);
+strcat(consulta, "' AND jugadores.id_j = relacion.jugador AND partidas.id_p = relacion.partida;");
+
+err = mysql_query(conn, consulta);
+if (err != 0) {
+	printf("Error al consultar datos de la base %u %s\n",
+		mysql_errno(conn), mysql_error(conn));
+	exit(1);
+}
+
+//recogemos el resultado de la consulta. 
+
+resultado = mysql_store_result(conn);
+
+// Obtenemos la primera fila que se almacena en una
+// variable de tipo MYSQL_ROW
+
+row = mysql_fetch_row(resultado);
+
+if (row == NULL)
+printf("No ha jugado ahun.\n");
+else
+while (row != NULL) {
+	// la columna 0 contiene el id de la partida
+	int id;
+	id = atoi(row[0]);
+	printf("ID de la partida: %s, Fecha: %s\n", id, row[1]);
+	// obtenemos la siguiente fila
+	row = mysql_fetch_row(resultado);
+}
+
+/////////////////////////Consulta sobre la contraseña del ganador de la partida mas larga///////////////////////////////
+
+char Buscar_Contraseña(
+{
+	err = mysql_query(conn, "SELECT jugadores.password FROM jugadores.partidas.relacion WHERE jugadores.nombre = partidas.ganador AND jugadores.id_j = relacion.jugador AND partidas.id_p = relacion.partida IN (SELECT MAX(partidas.duracion) FROM partidas");
+
+if (err != 0) {
+	printf("Error al consultar datos de la base %u %s\n",
+		mysql_errno(conn), mysql_error(conn));
+	exit(1);
+}
+
+//recogemos el resultado de la consulta. 
+resultado = mysql_store_result(conn);
+
+// Obtenemos la primera fila que se almacena en una
+// variable de tipo MYSQL_ROW
+
+row = mysql_fetch_row(resultado);
+
+if (row == NULL)
+printf("No tiene contraseña\n");
+else
+while (row != NULL) {
+
+	printf("Contraseña del jugador: %s\n", row[1]);
+	// obtenemos la siguiente fila
+	row = mysql_fetch_row(resultado);
+	return resultado;
+}
+
+/////////////////////////Consulta sobre cuantos jugadores han ganado una partida hoy///////////////////////////////
+char Nombre_Jugadores(int fecha[20])
+{
+	int fecha[20];
+	printf("Dame la fecha de la partida\ d");
+	scanf("%d", fecha);
+
+	char consulta[80];
+	strcpy(consulta, "SELECT jugadores.nombre FROM jugadores, partidas, relacion WHERE partidas.fecha = '");
+	strcat(consulta, fecha);
+	strcat(consulta, "' AND jugadores.nombre = partidas.ganador AND jugadores.id_j = relacion.jugador AND partidas.id_p = relacion.partida");
+
+	err = mysql_query(conn, consulta);
+	if (err != 0) {
+		printf("Error al consultar datos de la base %u %s\n",
+			mysql_errno(conn), mysql_error(conn));
+		exit(1);
+	}
+
+	//recogemos el resultado de la consulta.
+
+	resultado = mysql_store_result(conn);
+
+	// Obtenemos la primera fila que se almacena en una
+	// variable de tipo MYSQL_ROW
+
+	row = mysql_fetch_row(resultado);
+
+	if (row == NULL)
+		printf("No tiene contraseña\n");
+	else
+		while (row != NULL) {
+
+			printf("Contraseña del jugador: %s\n", row[1]);
+			// obtenemos la siguiente fila
+			row = mysql_fetch_row(resultado);
+			return resultado;
+
 // MAIN
 
 int main(int argc, char *argv[])
@@ -223,6 +332,52 @@ int main(int argc, char *argv[])
 					strcpy (buff2,"ERROR al registrar,");
                     
 				break;
+
+				case 2
+
+				p = strtok(NULL, "/");
+				char nombre[20];
+				strcpy(nombre, p);
+				p = strtok(NULL, "/");
+				char password[20];
+				strcpy(password, p);
+
+				login = Login(nombre, password)
+					if (login == 0)
+						strcpy(buff2, "Bienvenido");
+				    if (login == -2)
+					    strcpy(buff2, "Error al entrar");
+				    if (login == -1)
+					    strcpy(buff2, "El usuario no existe");
+
+				case 3
+
+					p = strtok(NULL, "/");
+					char nombre[20];
+					strcpy(nombre, p);
+					
+					partidas = Partidas_ganadas(nombre);
+						
+
+				case 4
+
+						p = strtok(NULL, "/");
+						int fecha[20];
+						strcpy(fecha, p);
+						
+						jugadores = Nombre_Jugadores(fecha);
+
+				case 5
+
+						contraseña = Buscar_Contraseña();
+							
+
+
+
+
+
+
+
 
 
 
