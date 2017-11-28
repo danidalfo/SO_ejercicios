@@ -34,14 +34,10 @@ int Conecta_base()
 	else return 0;
 }
 
-// Función para buscar un jugador en la tabla.
-// Devuelve 0 si esta en la tabla.
-// Devuelve -1 si no ha podido consultar
-// Devuelve -2 si el usuario no esta en la tabla
-
 int Login(char name[20],char password[20])
 
 {
+	
 	char consulta[100];
 	strcpy (consulta,"SELECT * FROM jugadores WHERE nombre = '"); 
 	strcat (consulta, name);
@@ -50,6 +46,8 @@ int Login(char name[20],char password[20])
 	strcat (consulta, " '");
 	
 	int err;
+	MYSQL *conn;
+	conn = mysql_init(NULL);
 	MYSQL_RES *resultado;
 	MYSQL_ROW row;
 	err=mysql_query (conn, consulta); 
@@ -74,14 +72,19 @@ int Login(char name[20],char password[20])
 int Contar_Tabla()
 {
 	int cont=0;
+	MYSQL *conn;
+	conn = mysql_init(NULL);
 	MYSQL_RES *resultado;
     MYSQL_ROW row;
 	int err;	
 	err=mysql_query (conn, "SELECT MAX(id_j) FROM jugadores"); 
 	if (err!=0) 
-	{printf("ERROR al contar");
-		return -1;}
-	else{
+	{
+		printf("ERROR al contar");
+		return -1;
+	}
+	else
+	{
 		resultado = mysql_store_result (conn); 
 		row=mysql_fetch_row(resultado);
 		cont=atoi(row[0]);
@@ -99,13 +102,13 @@ int Registro(char name[20],char password[20]){
 	int err;
 	int b;
 	char consulta[100];
-	char ID [6];
+	MYSQL *conn;
 	MYSQL_RES *resultado;
 	MYSQL_ROW row;
 	int id;
 	
-	b=Buscar_en_Tabla(name,password);
-	
+	//b=Buscar_en_Tabla(name,password);
+
 	if(b==-2)
 	{
 		
@@ -134,20 +137,23 @@ int Registro(char name[20],char password[20]){
 	}
 	
 	if (b==-1)
-		return -1;
-    
-	if (b==0)
-	printf ("El usuario ya existe!")
+	{	return -1;
+	}
+	else if (b==0)
+	{printf ("El usuario ya existe!");
     return -2;
-	
+	}
 	else 
 		return -1;
 	
 }
 
 int Partidas_ganadas (char nombre[20])
-
-char nombre[20];
+{
+int err;
+MYSQL *conn;
+MYSQL_ROW row;
+conn = mysql_init(NULL);
 // Pregunto el nombre del jugador
 printf("Dame el nombre del jugador\n");
 scanf("%s", nombre);
@@ -159,13 +165,12 @@ strcat(consulta, "' AND jugadores.id_j = relacion.jugador AND partidas.id_p = re
 
 err = mysql_query(conn, consulta);
 if (err != 0) {
-	printf("Error al consultar datos de la base %u %s\n",
-		mysql_errno(conn), mysql_error(conn));
+	printf("Error al consultar datos de la base %u %s\n", mysql_errno(conn), mysql_error(conn));
 	exit(1);
 }
 
 //recogemos el resultado de la consulta. 
-
+int resultado;
 resultado = mysql_store_result(conn);
 
 // Obtenemos la primera fila que se almacena en una
@@ -184,11 +189,15 @@ while (row != NULL) {
 	// obtenemos la siguiente fila
 	row = mysql_fetch_row(resultado);
 }
-
+}
 /////////////////////////Consulta sobre la contraseña del ganador de la partida mas larga///////////////////////////////
 
-char Buscar_Contraseña(
+char Buscar_Contrasena()
 {
+	int err;
+	MYSQL *conn;
+	MYSQL_ROW row;
+	conn = mysql_init(NULL);
 	err = mysql_query(conn, "SELECT jugadores.password FROM jugadores.partidas.relacion WHERE jugadores.nombre = partidas.ganador AND jugadores.id_j = relacion.jugador AND partidas.id_p = relacion.partida IN (SELECT MAX(partidas.duracion) FROM partidas");
 
 if (err != 0) {
@@ -198,7 +207,7 @@ if (err != 0) {
 }
 
 //recogemos el resultado de la consulta. 
-resultado = mysql_store_result(conn);
+int resultado = mysql_store_result(conn);
 
 // Obtenemos la primera fila que se almacena en una
 // variable de tipo MYSQL_ROW
@@ -206,24 +215,32 @@ resultado = mysql_store_result(conn);
 row = mysql_fetch_row(resultado);
 
 if (row == NULL)
-printf("No tiene contraseña\n");
+{
+	printf("No tiene contrasena\n");
+}
 else
 while (row != NULL) {
 
-	printf("Contraseña del jugador: %s\n", row[1]);
+	printf("Contrasena del jugador: %s\n", row[1]);
 	// obtenemos la siguiente fila
 	row = mysql_fetch_row(resultado);
 	return resultado;
-}
 
+}
+}
 /////////////////////////Consulta sobre cuantos jugadores han ganado una partida hoy///////////////////////////////
 char Nombre_Jugadores(int fecha[20])
 {
-	int fecha[20];
+	
+	MYSQL_ROW row;
+	MYSQL *conn;
+	MYSQL_RES *resultado;
+	conn = mysql_init(NULL);
 	printf("Dame la fecha de la partida\ d");
 	scanf("%d", fecha);
 
 	char consulta[80];
+	int err;
 	strcpy(consulta, "SELECT jugadores.nombre FROM jugadores, partidas, relacion WHERE partidas.fecha = '");
 	strcat(consulta, fecha);
 	strcat(consulta, "' AND jugadores.nombre = partidas.ganador AND jugadores.id_j = relacion.jugador AND partidas.id_p = relacion.partida");
@@ -245,25 +262,35 @@ char Nombre_Jugadores(int fecha[20])
 	row = mysql_fetch_row(resultado);
 
 	if (row == NULL)
+	{
 		printf("No tiene contraseña\n");
+	}
+
 	else
+	{
 		while (row != NULL) {
 
 			printf("Contraseña del jugador: %s\n", row[1]);
 			// obtenemos la siguiente fila
 			row = mysql_fetch_row(resultado);
 			return resultado;
+	}
+}
 
+}
 // MAIN
 
 int main(int argc, char *argv[])
 {
+	char jugadores;
+	char Contrasena;
 	int sock_conn, sock_listen, ret;
 	struct sockaddr_in serv_adr;
 	char buff[512];
 	char buff2[512];
 	// INICIALITZACIONS
 	// Obrim el socket
+	
 	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		printf("Error creant socket");
 	// Fem el bind al port
@@ -272,7 +299,7 @@ int main(int argc, char *argv[])
 	memset(&serv_adr, 0, sizeof(serv_adr));// inicialitza a zero serv_addr
 	serv_adr.sin_family = AF_INET;
 	
-	// asocia el socket a cualquiera de las IP de la m?quina. 
+	// asocia el socket a cualquiera de las IP de la maquina. 
 	//htonl formatea el numero que recibe al formato necesario
 	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 	// escucharemos en el port 9050
@@ -289,14 +316,14 @@ int main(int argc, char *argv[])
 		printf ("Escuchando\n");
 		
 		sock_conn = accept(sock_listen, NULL, NULL);
-		printf ("He recibido conexi?n\n");
+		printf ("He recibido conexion\n");
 		//sock_conn es el socket que usaremos para este cliente
 		
 		// Ahora recibimos su nombre, que dejamos en buff
 		ret=read(sock_conn,buff, sizeof(buff));
 		printf ("Recibido\n");
 		
-		// Tenemos que a?adirle la marca de fin de string 
+		// Tenemos que añadirle la marca de fin de string 
 		// para que no escriba lo que hay despues en el buffer
 		buff[ret]='\0';
 		
@@ -313,7 +340,7 @@ int main(int argc, char *argv[])
 		// Codigo 1 = Registrarse
         	case 1:
 			
-            int regi;	
+            int regi;
                 
              p = strtok( NULL, "/");
              char nombre[20];
@@ -333,6 +360,7 @@ int main(int argc, char *argv[])
                     
 				break;
 
+				// Codigo 2 = Login
 				case 2
 
 				p = strtok(NULL, "/");
@@ -369,8 +397,10 @@ int main(int argc, char *argv[])
 
 				case 5
 
-						contraseña = Buscar_Contraseña();
-							
+					Contrasena= Buscar_Contrasena();
+		}
+	}
+}
 
 
 

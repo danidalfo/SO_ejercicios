@@ -26,5 +26,6 @@ SELECT Cliente.nombre
 FROM Cliente,Compra,Producto
 WHERE Producto.nombre = 'Harina'
 AND Compra.idPro = Producto.id
-AND Compra.fecha IN (SELECT Compra.fecha FROM Cliente,Compra,Producto WHERE Producto.nombre ='Harina' AND Compra.idPro = Producto.id AND Cliente.id = Compra.idCli AND Cliente.nombre = 'Juan')
+AND Compra.fecha IN (SELECT Compra.fecha FROM Cliente,Compra,Producto WHERE Producto.nombre ='Harina' AND Compra.idPro = Producto.id
+                     AND Cliente.id = Compra.idCli AND Cliente.nombre = 'Juan')
 AND Cliente.id = Compra.idCli;

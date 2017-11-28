@@ -1,0 +1,22 @@
+sh Exemplo3.sh resultado.txt 1
+
+echo "Dame delimitador"
+read delimitador
+
+case $2 in
+
+1)
+    for item in *.txt
+        do
+            cat $item >> $1
+            echo $delimitador >> $1
+        done
+;;
+
+2)
+    for item in *.sh
+        do
+            cat $item >> $1
+            echo $delimitador >> $1
+        done
+;;
